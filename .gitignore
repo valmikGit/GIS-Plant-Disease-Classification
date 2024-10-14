@@ -1,0 +1,6 @@
+plantenv
+*.zip
+plantvillage dataset
+*.json
+*.h5
+*.pyc
