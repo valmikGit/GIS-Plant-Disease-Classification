@@ -5,3 +5,4 @@ plantvillage dataset
 *.h5
 *.pyc
 *.jpg
+db.sqlite3
