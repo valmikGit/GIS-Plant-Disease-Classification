@@ -6,3 +6,7 @@ plantvillage dataset
 *.pyc
 *.jpg
 db.sqlite3
+test
+train
+sample_submission.csv
+*.png
