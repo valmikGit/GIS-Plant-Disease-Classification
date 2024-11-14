@@ -21,6 +21,7 @@ ml_model = load_model(
     r"C:\Users\Valmik Belgaonkar\OneDrive\Desktop\GIS-Plant-Disease-Classification\ML_Model\plant_disease_prediction_model.h5"
 )
 
+seedling_model = load_model(r"C:\Users\Valmik Belgaonkar\OneDrive\Desktop\GIS-Plant-Disease-Classification\ML_Model\plant-seedlings-classification\model_best.keras")
 
 # Create your views here.
 def load_and_preprocess_image(image_path, target_size=(224, 224)):
@@ -43,6 +44,101 @@ def predict_image_class(model, image_path, class_indices):
     predicted_class_index = np.argmax(predictions, axis=1)[0]
     predicted_class_name = class_indices[str(predicted_class_index)]
     return predicted_class_name
+
+def color_segment_function(img_array):
+    img_array= np.rint(img_array)
+    img_array= img_array.astype('uint8')
+    hsv_img= cv2.cvtColor(img_array, cv2.COLOR_RGB2HSV)
+    mask = cv2.inRange(hsv_img, (24, 50, 0), (55, 255, 255))
+    result = cv2.bitwise_and(img_array, img_array, mask=mask)
+    result= result.astype('float64')
+    return result
+
+@api_view(['POST'])
+def make_prediction_for_seedling(request: HttpRequest) -> Response:
+    if request.method != 'POST':
+        return Response({
+            'message': f'Allowed method is POST but got {request.method}.'
+        })
+    if 'image' not in request.FILES:
+        return Response({'error': 'No image file uploaded'}, status=400)
+    
+    print('Hello')
+    print(request.FILES)
+
+    # Save the image temporarily
+    try:
+        image_file = request.FILES['image']
+        temp_image_name = f"{uuid.uuid4()}.jpg"  # Unique filename to avoid conflicts
+        temp_image_path = os.path.join('temp_images', temp_image_name)  # Temporary directory
+    except Exception as e:
+        return JsonResponse({
+            'message': f'Error during file handling: {e}'
+        })
+    
+    print('Hello 2')
+
+    # Ensure temp directory exists
+    os.makedirs(os.path.dirname(temp_image_path), exist_ok=True)
+    
+    # Save the file locally
+    path = default_storage.save(temp_image_path, ContentFile(image_file.read()))
+    
+    try:
+        # Load an image in RGB format
+        image = cv2.imread(path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = cv2.resize(image, (150, 150))
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert to RGB if read in BGR format
+
+        # Apply the color segmentation function
+        segmented_image = color_segment_function(image_rgb)
+
+        # Add batch dimension to the segmented image
+        segmented_image = np.expand_dims(segmented_image, axis=0)
+
+        # Run the prediction
+        predictions = seedling_model.predict(segmented_image)
+
+        # Assuming you already have class weights calculated
+        class_weight = {
+            0: 1.30, 1: 0.88, 2: 1.19, 3: 0.56, 4: 1.55,
+            5: 0.72, 6: 0.52, 7: 1.55, 8: 0.66, 9: 1.48,
+            10: 0.69, 11: 0.89
+        }
+
+        # Define your class labels for readability (you may already have this in `label_map`)
+        class_labels = {
+            0: "Black-grass", 1: "Charlock", 2: "Cleavers", 3: "Common Chickweed",
+            4: "Common wheat", 5: "Fat Hen", 6: "Loose Silky-hent", 7: "Maize",
+            8: "Scentless Mayweed", 9: "Shepherds Purse", 10: "Small-flowered Cranesbill", 11: "Sugarbeet"
+        }
+
+        # Step 1: Apply class weights to the model's predictions
+        weighted_predictions = [pred * class_weight[i] for i, pred in enumerate(predictions[0])]
+
+        # Step 2 (Optional): Re-normalize to get a probability distribution that sums to 1
+        weighted_sum = sum(weighted_predictions)
+        normalized_weighted_predictions = [wp / weighted_sum for wp in weighted_predictions]
+
+        # Step 3: Find the class with the highest weighted probability
+        predicted_index = np.argmax(normalized_weighted_predictions)
+        predicted_label = class_labels[predicted_index]
+
+        return Response({
+            'prediction': predicted_label
+        })
+
+    except Exception as e:
+        # Capture full traceback for debugging
+        error_message = traceback.format_exc()
+        print(f'Error during prediction: {error_message}')
+        return Response({'error': f'An error occurred: {str(e)}'}, status=400)
+
+    finally:
+        # Clean up: Delete the temporary image after prediction
+        if os.path.exists(path):
+            os.remove(path)
 
 @api_view(['POST'])
 def make_prediction(request: HttpRequest) -> Response:
