@@ -18,13 +18,13 @@ import cv2
 from django.http import HttpRequest, HttpResponse
 
 # Load the model (this can be done once when the server starts)
-ml_model = load_model(
-    r"C:\Users\Valmik Belgaonkar\OneDrive\Desktop\GIS-Plant-Disease-Classification\ML_Model\plant_disease_prediction_model.h5"
-)
+# ml_model = load_model(
+#     r"C:\Users\Valmik Belgaonkar\OneDrive\Desktop\GIS-Plant-Disease-Classification\ML_Model\plant_disease_prediction_model.h5"
+# )
 
-seedling_model = load_model(
-    r"C:\Users\Valmik Belgaonkar\OneDrive\Desktop\GIS-Plant-Disease-Classification\ML_Model\plant-seedlings-classification\model_best.keras"
-)
+# seedling_model = load_model(
+#     r"C:\Users\Valmik Belgaonkar\OneDrive\Desktop\GIS-Plant-Disease-Classification\ML_Model\plant-seedlings-classification\model_best.keras"
+# )
 
 
 # Create your views here.
@@ -71,6 +71,9 @@ def make_prediction_for_seedling(request: HttpRequest) -> Response:
 
     print("Hello")
     print(request.FILES)
+    return Response({
+        'message': 'Fuck yeah'
+    })
 
     # Save the image temporarily
     try:
@@ -282,6 +285,9 @@ def make_prediction(request: HttpRequest) -> Response:
 
     print("Hello")
     print(request.FILES)
+    return Response({
+        'message': 'Fuck yeah'
+    })
 
     # Save the image temporarily
     try:
