@@ -5,7 +5,7 @@ import { ImageContext } from "../context/Base64Decode";
 const Seedling = () => {
   const [img, setImg] = useState(null);
 
-  const { base64String, setBase64String, imageUrl } = useContext(ImageContext);
+  //   const { base64String, setBase64String, imageUrl } = useContext(ImageContext);
   //   const [imageUrl1, setImageUrl] = useState("");
 
   async function handleImageUpload(e) {
@@ -30,7 +30,7 @@ const Seedling = () => {
       console.log("Response:", response);
       console.log("Response:", response.data.message);
       //   setImageUrl(response.data.message);
-      setBase64String(response.data.message);
+      //   setBase64String(response.data.message);
       // console.log("Response:", response.data);
       // alert("Product added successfully");
       // Handle response as needed
@@ -59,15 +59,15 @@ const Seedling = () => {
         Upload Image
       </button>
 
-      {imageUrl && (
+      {/* {imageUrl && (
         <>
           <a href={imageUrl} download="image.jpg">
             <button className="bg-blue-500 text-white p-4 rounded-md hover:bg-blue-600 transition-colors">
               Download Image
             </button>
           </a>
-        </>
-      )}
+        </> */}
+      {/* )} */}
     </div>
   );
 };
