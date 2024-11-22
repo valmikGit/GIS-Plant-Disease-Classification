@@ -69,11 +69,11 @@ def make_prediction_for_seedling(request: HttpRequest) -> Response:
     if "image" not in request.FILES:
         return Response({"error": "No image file uploaded"}, status=400)
 
-    print("Hello")
-    print(request.FILES)
-    return Response({
-        'message': 'Fuck yeah'
-    })
+    # print("Hello")
+    # print(request.FILES)
+    # return Response({
+    #     'message': 'Fuck yeah'
+    # })
 
     # Save the image temporarily
     try:
@@ -283,11 +283,11 @@ def make_prediction(request: HttpRequest) -> Response:
     if "image" not in request.FILES:
         return Response({"error": "No image file uploaded"}, status=400)
 
-    print("Hello")
-    print(request.FILES)
-    return Response({
-        'message': 'Fuck yeah'
-    })
+    # print("Hello")
+    # print(request.FILES)
+    # return Response({
+    #     'message': 'Fuck yeah'
+    # })
 
     # Save the image temporarily
     try:
